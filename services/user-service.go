@@ -23,6 +23,18 @@ func SearchUser(userId int64) (*users.User, *errors.RestErr) {
 	return result, nil
 }
 
+func DeleteUser(userId int64) (bool, *errors.RestErr) {
+	result := &users.User{Id: userId}
+	if err := result.Get(); err != nil {
+		return false, err
+	}
+	qResult, err := result.Delete()
+	if err != nil {
+		return false, err
+	}
+	return qResult, nil
+}
+
 func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
 	currentUser, err := SearchUser(user.Id)
 	if err != nil {

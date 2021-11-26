@@ -65,5 +65,16 @@ func SearchUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-
+	userId, deleteErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if deleteErr != nil {
+		err := errors.BadRequestError("user id should be a number")
+		c.JSON(err.Status, err.Message)
+		return
+	}
+	status, getErr := services.DeleteUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, status)
 }

@@ -54,3 +54,16 @@ func (user *User) Update() *errors.RestErr {
 	}
 	return nil
 }
+
+func (user *User) Delete() (bool, *errors.RestErr) {
+	stmt, err := usersdb.Client.Prepare("delete from users where id = ?;")
+	if err != nil {
+		return false, errors.InternalServerError(err.Error())
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(user.Id)
+	if err != nil {
+		return false, errors.InternalServerError(fmt.Sprintf("error occured while deleting the user %s ", err.Error()))
+	}
+	return true, nil
+}

@@ -11,3 +11,7 @@ func GetNow() carbon.Carbon {
 func GetNowString() string {
 	return GetNow().ToRfc3339String()
 }
+
+func GetNowDbString() string {
+	return GetNow().ToDateTimeString()
+}

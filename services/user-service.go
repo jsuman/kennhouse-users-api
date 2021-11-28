@@ -5,7 +5,22 @@ import (
 	"github.com/jsuman/kennhouse-users-api/utils/errors"
 )
 
-func CreateUser(user users.User) (*users.User, *errors.RestErr) {
+var (
+	UserService UserServiceInterface = &userService{}
+)
+
+type userService struct {
+}
+
+type UserServiceInterface interface {
+	CreateUser(user users.User) (*users.User, *errors.RestErr)
+	SearchUser(int64) (*users.User, *errors.RestErr)
+	DeleteUser(int64) (bool, *errors.RestErr)
+	UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr)
+	FindUser(string) (users.Users, *errors.RestErr)
+}
+
+func (u *userService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -15,7 +30,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func SearchUser(userId int64) (*users.User, *errors.RestErr) {
+func (u *userService) SearchUser(userId int64) (*users.User, *errors.RestErr) {
 	result := &users.User{Id: userId}
 	if err := result.Get(); err != nil {
 		return nil, err
@@ -23,7 +38,7 @@ func SearchUser(userId int64) (*users.User, *errors.RestErr) {
 	return result, nil
 }
 
-func DeleteUser(userId int64) (bool, *errors.RestErr) {
+func (u *userService) DeleteUser(userId int64) (bool, *errors.RestErr) {
 	result := &users.User{Id: userId}
 	if err := result.Get(); err != nil {
 		return false, err
@@ -35,8 +50,8 @@ func DeleteUser(userId int64) (bool, *errors.RestErr) {
 	return qResult, nil
 }
 
-func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
-	currentUser, err := SearchUser(user.Id)
+func (u *userService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+	currentUser, err := u.SearchUser(user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -61,4 +76,9 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 		return nil, err
 	}
 	return currentUser, nil
+}
+
+func (u *userService) FindUser(status string) (users.Users, *errors.RestErr) {
+	dao := &users.User{}
+	return dao.FindUser(status)
 }

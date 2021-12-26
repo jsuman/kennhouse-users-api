@@ -2,6 +2,8 @@ package services
 
 import (
 	"github.com/jsuman/kennhouse-users-api/src/domain/users"
+	"github.com/jsuman/kennhouse-users-api/src/utils/cryptoUtils"
+	datetimeutils "github.com/jsuman/kennhouse-users-api/src/utils/dateTimeUtils"
 	"github.com/jsuman/kennhouse-users-api/src/utils/errors"
 )
 
@@ -18,12 +20,21 @@ type UserServiceInterface interface {
 	DeleteUser(int64) (bool, *errors.RestErr)
 	UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr)
 	FindUser(string) (users.Users, *errors.RestErr)
+	LoginUser(users.LoginRequest) (*users.User, *errors.RestErr)
 }
 
 func (u *userService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+
+	user.Status = users.StatusActive
+	user.DateCreated = datetimeutils.GetNowDbString()
+	pass, passErr := cryptoUtils.EncryptPassword(user.Password)
+	if passErr != nil {
+		return nil, passErr
+	}
+	user.Password = pass
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -81,4 +92,21 @@ func (u *userService) UpdateUser(isPartial bool, user users.User) (*users.User, 
 func (u *userService) FindUser(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindUser(status)
+}
+
+func (u *userService) LoginUser(loginRequest users.LoginRequest) (*users.User, *errors.RestErr) {
+
+	dao := &users.User{
+		Email:    loginRequest.Email,
+		Password: loginRequest.Password,
+	}
+
+	if err := dao.FindByEmail(); err != nil {
+		return nil, err
+	}
+
+	if err := cryptoUtils.ComparePassword(dao.Password, loginRequest.Password); err != nil {
+		return nil, err
+	}
+	return dao, nil
 }

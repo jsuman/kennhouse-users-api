@@ -5,18 +5,18 @@ import (
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/jsuman/kennhouse-users-api/utils/errors"
+	"github.com/jsuman/kennhouse-users-api/src/utils/errors"
 )
 
 const (
-	errorNoRows = "no rows in result set"
+	ErrorNoRows = "no rows in result set"
 )
 
 func ParseError(err error) *errors.RestErr {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	fmt.Println(err.Error())
 	if !ok {
-		if strings.Contains(err.Error(), errorNoRows) {
+		if strings.Contains(err.Error(), ErrorNoRows) {
 			return errors.NotFoundError("No matching record found")
 		}
 		return errors.InternalServerError("Error parsing database response")

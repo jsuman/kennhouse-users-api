@@ -29,7 +29,7 @@ CREATE TABLE `users` (
   `email` varchar(45) DEFAULT NULL,
   `date_created` datetime DEFAULT NULL,
   `status` varchar(45) NOT NULL,
-  `password` varchar(256) NOT NULL,
+  `password` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
